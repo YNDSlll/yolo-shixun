@@ -1,9 +1,6 @@
 # 交通标志检测与人脸表情识别
 
-<div align="center">
-</div>
-
-<div align="center">
+<div align="left">
   <img alt="项目标签" src="https://img.shields.io/badge/项目类型-计算机视觉-0A66C2" />
   <img alt="任务类型" src="https://img.shields.io/badge/任务-交通标志+人脸表情-FF6B6B" />
   <img alt="算法框架" src="https://img.shields.io/badge/框架-YOLO-00C2A8" />
