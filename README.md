@@ -1,5 +1,16 @@
 # 交通标志检测与人脸表情识别
 
+<div align="center">
+  <img src="screenshots/traffic_signal_demo.jpg" alt="项目封面图" width="900" />
+</div>
+
+<div align="center">
+  <img alt="项目标签" src="https://img.shields.io/badge/项目类型-计算机视觉-0A66C2" />
+  <img alt="任务类型" src="https://img.shields.io/badge/任务-交通标志+人脸表情-FF6B6B" />
+  <img alt="算法框架" src="https://img.shields.io/badge/框架-YOLO-00C2A8" />
+  <img alt="界面" src="https://img.shields.io/badge/演示-Streamlit-7C3AED" />
+</div>
+
 这是一个基于 Ultralytics YOLO 的计算机视觉项目，聚焦于两类实际场景下的目标检测任务：
 
 - 交通标志检测：用于道路场景中的交通标志识别
@@ -66,6 +77,20 @@
 │   └── facial_results.png
 └── ultralytics/
 ```
+
+## 关于文件
+
+本项目的关键文件职责如下：
+
+- `app.py`：主界面程序，整合登录页、首页和两类检测功能，负责加载模型并调用 Streamlit 展示检测结果。
+- `01-预训练模型推理一张图片.py`：演示单张图片推理流程，适用于快速验证模型效果。
+- `02-预训练模型推理摄像头.py`：基于本地摄像头实时检测，可用于现场演示和实验验证。
+- `03-推理结果解析.py`：读取并解析检测输出，提取类别、置信度和边界框信息，便于结果分析。
+- `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
+- `datasets/FacialExpression/`：表情数据集目录，包含训练/验证数据与配置文件。
+- `runs/`：保存训练过程中的权重、预测结果和可视化产物。
+- `screenshots/`：项目展示图，主要用于 GitHub 介绍页和效果展示。
+- `ultralytics/`：项目依赖的 Ultralytics YOLO 实现代码，提供模型推理和训练能力。
 
 ## 效果展示
 
