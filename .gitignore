@@ -153,6 +153,14 @@ runs/
 wandb/
 .DS_Store
 
+# Allow project screenshots to be committed
+!screenshots/
+!screenshots/*.jpg
+!screenshots/*.jpeg
+!screenshots/*.png
+!screenshots/*.gif
+!screenshots/*.webp
+
 # Neural Network weights -----------------------------------------------------------------------------------------------
 weights/
 *.weights
@@ -182,12 +190,6 @@ pnnx*
 # calibration image
 calibration_*.npy
 
-# 允许上传项目截图
-!screenshots/
-!screenshots/*.jpg
-!screenshots/*.png
-!screenshots/*.jpeg
-
 # Videos and Pictures
 *.mp4
 *.avi
@@ -205,6 +207,14 @@ calibration_*.npy
 *.heic
 *.ico
 *.raw
+
+# 允许上传项目截图
+!screenshots/
+!screenshots/*.jpg
+!screenshots/*.jpeg
+!screenshots/*.png
+!screenshots/*.gif
+!screenshots/*.webp
 
 # Training logs
 args.yaml
