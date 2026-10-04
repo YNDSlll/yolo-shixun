@@ -182,6 +182,12 @@ pnnx*
 # calibration image
 calibration_*.npy
 
+# 允许上传项目截图
+!screenshots/
+!screenshots/*.jpg
+!screenshots/*.png
+!screenshots/*.jpeg
+
 # Videos and Pictures
 *.mp4
 *.avi
