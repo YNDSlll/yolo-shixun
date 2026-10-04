@@ -1,7 +1,6 @@
 # 交通标志检测与人脸表情识别
 
 <div align="center">
-  <img src="screenshots/traffic_signal_demo.jpg" alt="项目封面图" width="900" />
 </div>
 
 <div align="center">
