@@ -1,0 +1,5 @@
+# Streamlit Community Cloud 的 apt 依赖清单
+# opencv-python 在 Linux 上需要 libGL，缺少会报
+# ImportError: libGL.so.1: cannot open shared object file
+libgl1
+libglib2.0-0

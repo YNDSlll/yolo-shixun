@@ -5,6 +5,7 @@
   <img alt="任务类型" src="https://img.shields.io/badge/任务-交通标志+人脸表情-FF6B6B" />
   <img alt="算法框架" src="https://img.shields.io/badge/框架-YOLO-00C2A8" />
   <img alt="界面" src="https://img.shields.io/badge/演示-Streamlit-7C3AED" />
+  <img alt="部署" src="https://img.shields.io/badge/部署-Streamlit%20Cloud-FF4B4B" />
 </div>
 
 这是一个面向智能交通与情绪交互场景的计算机视觉项目，基于 Ultralytics YOLO 实现交通标志识别与人脸表情识别，并通过 Streamlit 构建可视化演示界面。
@@ -14,13 +15,28 @@
 - 交通标志检测：面向道路场景中的交通信息识别与安全辅助
 - 人脸表情识别：用于情绪状态分析与人机交互场景的视觉理解
 
+## 在线体验
+
+项目已部署到 Streamlit Community Cloud，不需要配置任何本地环境，打开浏览器就能直接试用：
+
+| 项目 | 内容 |
+| --- | --- |
+| 访问地址 | `https://<应用名>.streamlit.app`（部署完成后替换为实际地址） |
+| 登录账号 | `lhy` |
+| 登录密码 | `111` |
+
+使用步骤：打开上面的地址 → 输入账号密码登录 → 左侧菜单选择「交通标志检测」或「人脸表情检测」→ 上传一张图片 → 点击「开始检测」。
+
+> 说明：应用长时间无人访问会自动休眠，再次打开需要约 1 分钟冷启动，页面提示「Please wait」时稍等片刻即可。
+> 该账号是演示用固定账号，不涉及任何真实用户数据。
+
 ## 项目亮点
 
 - 基于 YOLO 的端到端检测流程
-- 使用 Streamlit 构建轻量 Web 界面
+- 使用 Streamlit 构建轻量 Web 界面，并已部署到公网
 - 支持两类自定义检测任务
-- 提供真实模型推理结果与训练输出
-- 包含训练日志、验证结果和演示图像
+- 随仓库提供两个自训练模型权重，克隆后即可直接推理
+- 提供演示截图与推理示例脚本
 
 ## 核心功能
 
@@ -43,35 +59,38 @@
 - 单张图像推理示例
 - 摄像头实时推理示例
 - 检测结果解析
-- 训练结果可视化与评估图表
+- 训练结果概览截图（混淆矩阵、训练曲线）
 
 ## 项目结构
 
 ```text
 .
-├── app.py
+├── app.py                              # Streamlit 主程序（登录 + 两类检测页面）
 ├── 01-预训练模型推理一张图片.py
 ├── 02-预训练模型推理摄像头.py
 ├── 03-推理结果解析.py
-├── yolo26n.pt
+├── yolo26n.pt                          # 官方 COCO 预训练权重（80 类通用目标）
+├── requirements.txt                    # Python 依赖清单（云端部署读取此文件）
+├── packages.txt                        # 系统级依赖（opencv 所需的 libGL 等）
+├── .gitignore
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml
-├── .gitignore
-├── datasets/
+├── datasets/                           # 训练数据集（体积较大，未随仓库发布）
 │   ├── traffic_signal/
 │   └── FacialExpression/
-├── runs/
-│   └── detect/
-├── images/
-│   ├── upload/
-│   └── result/
+├── runs/detect/trains/                 # 训练产物，仅随仓库发布两个 best.pt
+│   ├── train-TrafficSignal/weights/best.pt
+│   └── train-FacialExpression/weights/best.pt
+├── images/                             # 运行时自动创建，不随仓库发布
+│   ├── upload/                         # 上传的待检测图片
+│   └── result/                         # 检测结果图片
 ├── screenshots/
 │   ├── traffic_signal_demo.jpg
 │   ├── facial_expression_demo.jpg
 │   ├── traffic_results.png
 │   └── facial_results.png
-└── ultralytics/
+└── ultralytics/                        # YOLO 框架源码
 ```
 
 ## 关于文件
@@ -82,9 +101,13 @@
 - `01-预训练模型推理一张图片.py`：演示单张图片推理流程，适用于快速验证模型效果。
 - `02-预训练模型推理摄像头.py`：基于本地摄像头实时检测，可用于现场演示和实验验证。
 - `03-推理结果解析.py`：读取并解析检测输出，提取类别、置信度和边界框信息，便于结果分析。
+- `yolo26n.pt`：官方 COCO 预训练权重，共 80 类通用目标，用于跑通推理流程以及作为自训练模型的后备。
+- `requirements.txt`：Python 依赖清单，Streamlit Cloud 会自动读取并安装。
+- `packages.txt`：系统级依赖清单，主要是 `opencv` 在 Linux 上需要的 `libGL`。
 - `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
 - `datasets/FacialExpression/`：表情数据集目录，包含训练/验证数据与配置文件。
-- `runs/`：保存训练过程中的权重、预测结果和可视化产物。
+- `runs/`：训练产物目录。为了避免仓库过大，仅随仓库发布两个 `best.pt` 权重，验证预测图、混淆矩阵、训练曲线等中间产物不入库。
+- `images/`：运行时创建的图片目录，保存用户上传的原图与检测结果图，程序会自动建立，不随仓库发布。
 - `screenshots/`：项目展示图，主要用于 GitHub 介绍页和效果展示。
 - `ultralytics/`：项目依赖的 Ultralytics YOLO 实现代码，提供模型推理和训练能力。
 
@@ -106,12 +129,20 @@
 
 ## 数据与模型
 
-该项目包含两类自定义数据集与已训练模型：
+项目涉及三个权重文件，作用并不相同，这里区分清楚：
 
-- 交通标志数据集：4 个类别
-- 人脸表情数据集：8 个类别
+| 权重文件 | 来源 | 类别数 | 用途 |
+| --- | --- | --- | --- |
+| `yolo26n.pt` | 官方 COCO 预训练权重 | 80 类通用目标 | 跑通推理流程、作为自训练模型的后备 |
+| `runs/detect/trains/train-TrafficSignal/weights/best.pt` | 本项目自训练 | 4 类交通标志 | 交通标志检测页面加载的模型 |
+| `runs/detect/trains/train-FacialExpression/weights/best.pt` | 本项目自训练 | 8 类人脸表情 | 人脸表情检测页面加载的模型 |
 
-模型输出保存在 `runs/` 目录中，包括验证预测图、混淆矩阵和训练曲线等结果。
+两个自训练模型的类别如下：
+
+- 交通标志（4 类）：`prohibitory`（禁止）、`danger`（危险）、`mandatory`（强制）、`other`（其他）
+- 人脸表情（8 类）：`Anger`、`Contempt`、`Disgust`、`Fear`、`Happy`、`Neutral`、`Sad`、`Surprise`
+
+数据集不随仓库发布，训练过程中的验证预测图、混淆矩阵与训练曲线同样未入库，仓库中只保留两个可直接用于推理的 `best.pt`。
 
 ## 发布说明
 
@@ -120,11 +151,17 @@
 重点特性包括：
 
 - 基于 Ultralytics YOLO 框架
-- 包含自定义数据集与验证结果
-- 提供 Streamlit 可视化界面
+- 随仓库提供两个自训练检测模型，可直接推理
+- 提供 Streamlit 可视化界面，并已部署到 Streamlit Cloud
 - 适用于智能交通、人脸识别与扩展型视觉应用
 
 ## 环境依赖
+
+依赖清单以仓库根目录的 `requirements.txt` 为准，云端部署会直接读取这份文件，本地也可以用同一份：
+
+```bash
+pip install -r requirements.txt
+```
 
 当前项目已在本地 conda 环境 `shixun` 中验证可运行，实际使用的核心库如下：
 
@@ -132,6 +169,7 @@
 streamlit==1.56.0
 ultralytics==8.4.39
 torch==2.10.0
+torchvision==0.26.0
 opencv-python==4.13.0
 numpy==2.4.3
 Pillow==12.2.0
@@ -145,10 +183,18 @@ polars==1.40.0
 
 ### 环境准备
 
-本项目基于 Ultralytics YOLO 框架，需在对应 Python 环境中运行。
+方式一：使用已配置好的 conda 环境
 
 ```bash
 conda activate shixun
+```
+
+方式二：新建虚拟环境并按依赖清单安装
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### 运行 Web 应用
@@ -175,10 +221,48 @@ python 02-预训练模型推理摄像头.py
 python 03-推理结果解析.py
 ```
 
+## 云端部署（Streamlit Community Cloud）
+
+本项目已适配 Streamlit Community Cloud 免费部署，部署完成后会得到一个公网可访问的地址。
+
+### 部署所需文件（已随仓库提供）
+
+- `requirements.txt`：Python 依赖清单，云端会自动读取并安装
+- `packages.txt`：系统级依赖（`libgl1`、`libglib2.0-0`），避免 `opencv` 在 Linux 上报 `libGL.so.1` 缺失
+- 模型权重：`yolo26n.pt` 与两个自训练 `best.pt` 均已随仓库发布
+- `app.py`：按脚本所在目录定位资源，并对模型启用缓存，避免每次点击都重新加载权重
+
+### 部署步骤
+
+1. 打开 [share.streamlit.io](https://share.streamlit.io/)，用 GitHub 账号登录并授权。
+2. 点击右上角 `Create app`，选择 `Deploy a public app from GitHub`。
+3. 按下表填写配置：
+
+   | 配置项 | 填写内容 |
+   | --- | --- |
+   | Repository | `YNDSlll/yolo-shixun` |
+   | Branch | `main` |
+   | Main file path | `app.py` |
+   | App URL | 自定义子域名，例如 `yolo-shixun` |
+
+4. 点击 `Deploy`，等待依赖安装与构建完成，首次构建通常需要 5～10 分钟。
+5. 构建成功后页面会给出公网地址，形如 `https://<应用名>.streamlit.app`，把它填回本文档「在线体验」一节即可。
+
+### 常见问题
+
+| 现象 | 原因与处理 |
+| --- | --- |
+| 报 `ModuleNotFoundError` | 确认 `requirements.txt` 已推送到 `main` 分支 |
+| 报 `libGL.so.1: cannot open shared object file` | 确认 `packages.txt` 已推送，然后在控制台点 `Reboot app` |
+| 点击检测报「模型文件缺失」 | 权重没进仓库，检查 `runs/detect/trains/*/weights/best.pt` 是否已推送 |
+| 首次打开很慢 | 免费版应用长时间无人访问会休眠，冷启动约需 1 分钟 |
+| 安装体积过大或超时 | 确认 `requirements.txt` 里的 `--extra-index-url https://download.pytorch.org/whl/cpu` 还在，避免安装 CUDA 版 torch |
+
 ## 说明
 
-- 该应用适合本地演示和实验测试
-- `app.py` 中的登录系统为简单演示用认证，不用于正式生产环境
+- 应用既可在本地运行，也可通过 Streamlit Cloud 在线访问，在线地址与演示账号见「在线体验」一节
+- `app.py` 中的登录系统为简单演示用认证，账号密码固定写在代码里，不用于正式生产环境
+- 仓库为公开仓库，演示账号也一并公开，请勿在其中存放任何真实数据
 - 项目可进一步扩展到交通监控、安全检测、人机交互等实际场景
 
 ## 许可证
@@ -187,4 +271,4 @@ python 03-推理结果解析.py
 
 ## 总结
 
-该仓库展示了一个结构清晰、可运行、可演示的 YOLO 计算机视觉应用，包含训练模型、推理脚本、数据集和 Web 界面，适合用于项目展示、技术评审以及后续功能扩展。
+该仓库展示了一个结构清晰、可运行、可演示的 YOLO 计算机视觉应用，包含自训练模型权重、推理脚本、演示素材与 Web 界面，既可克隆到本地运行，也可直接通过云端地址在线体验，适合用于项目展示、技术评审以及后续功能扩展。
