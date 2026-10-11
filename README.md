@@ -5,7 +5,7 @@
   <img alt="任务类型" src="https://img.shields.io/badge/任务-交通标志+人脸表情-FF6B6B" />
   <img alt="算法框架" src="https://img.shields.io/badge/框架-YOLO-00C2A8" />
   <img alt="界面" src="https://img.shields.io/badge/演示-Streamlit-7C3AED" />
-  <img alt="部署" src="https://img.shields.io/badge/部署-Streamlit%20Cloud-FF4B4B" />
+  <a href="https://yolo-shixun.streamlit.app/"><img alt="在线演示" src="https://img.shields.io/badge/在线演示-Streamlit%20Cloud-FF4B4B" /></a>
 </div>
 
 这是一个面向智能交通与情绪交互场景的计算机视觉项目，基于 Ultralytics YOLO 实现交通标志识别与人脸表情识别，并通过 Streamlit 构建可视化演示界面。
@@ -21,7 +21,7 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 访问地址 | `https://<应用名>.streamlit.app`（部署完成后替换为实际地址） |
+| 访问地址 | https://yolo-shixun.streamlit.app/ |
 | 登录账号 | `lhy` |
 | 登录密码 | `111` |
 
@@ -104,6 +104,7 @@
 - `environment-shixun.yml`：本地 conda / mamba 环境清单，由 `mamba env export -n shixun --no-builds` 导出，用于复现本地开发环境。文件名刻意不叫 `environment.yml`，避免被 Streamlit Cloud 识别成 conda 依赖文件（见下节说明）。
 - `requirements.txt`：Python 依赖清单，Streamlit Cloud 会自动读取并安装。
 - `packages.txt`：系统级依赖清单，主要是 `opencv` 在 Linux 上需要的 `libGL`。
+- `pyproject.toml`：Ultralytics 库自带的构建元数据（描述 `ultralytics` 包本身），**不是**本项目的部署清单。它在 Streamlit Cloud 的依赖文件优先级里排在最后，且仓库中已有 `requirements.txt`，因此云端不会读取它。
 - `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
 - `datasets/FacialExpression/`：表情数据集目录，包含训练/验证数据与配置文件。
 - `runs/`：训练产物目录。为了避免仓库过大，仅随仓库发布两个 `best.pt` 权重，验证预测图、混淆矩阵、训练曲线等中间产物不入库。
@@ -207,7 +208,7 @@ mamba env export -n shixun --no-builds > environment-shixun.yml
 pip install -r requirements.txt
 ```
 
-需要注意，Streamlit Cloud 的 Python 版本**不能通过仓库里的文件指定**（`runtime.txt` 在该平台不生效），必须在部署时的 `Advanced settings` 里手动选择，本项目请选 **3.11**，详见下一节。
+需要注意，Streamlit Cloud 的 Python 版本**不能通过仓库里的文件指定**（`runtime.txt` 在该平台不生效），必须在部署时的 `Advanced settings` 里手动选择。本项目已选 **3.11**，详见下一节。
 
 另外，云端 pin 的版本可能与本地 conda 环境略有差别，这是正常的：conda-forge 与 PyPI 的依赖元数据并不一致。例如本地 conda 装的 `torchvision 0.26.0` 可以和 `pytorch 2.10.0` 共存，但 CPU 源（PyPI 体系）上的 `torchvision 0.26.0` 要求 `torch==2.11.0`，因此 `requirements.txt` 里把两者成对固定为 `torch==2.11.0` + `torchvision==0.26.0`。
 
@@ -239,7 +240,18 @@ python 03-推理结果解析.py
 
 ## 云端部署（Streamlit Community Cloud）
 
-本项目已适配 Streamlit Community Cloud 免费部署，部署完成后会得到一个公网可访问的地址。
+本项目已完成 Streamlit Community Cloud 免费部署，公网地址见「在线体验」一节。
+
+### 当前部署状态
+
+| 项目 | 内容 |
+| --- | --- |
+| 部署状态 | 已上线 |
+| 应用地址 | https://yolo-shixun.streamlit.app/ |
+| 仓库 / 分支 | `YNDSlll/yolo-shixun` / `main` |
+| 入口文件 | `app.py` |
+| 云端 Python | 3.11（在 `Advanced settings` 中指定） |
+| 依赖来源 | `requirements.txt`（pip）+ `packages.txt`（apt 系统库） |
 
 ### 部署所需文件（已随仓库提供）
 
@@ -268,9 +280,11 @@ python 03-推理结果解析.py
    > 仓库下拉框里的候选列表**不一定完整**，如果没有出现 `yolo-shixun`，直接在输入框里手动敲完整仓库名 `YNDSlll/yolo-shixun` 即可，或者用 `Paste GitHub URL` 粘贴仓库地址。
 
 4. 展开 `Advanced settings`，把 `Python version` 选成 **3.11**（与本地 `shixun` 环境一致）。
-   云端默认版本更高（可能是 3.14），而 `torch==2.10.0` 等依赖在过新的 Python 上往往还没有可用的安装包，构建会直接失败。`Secrets` 一栏留空即可，本项目未使用 Secrets。
+   云端默认版本更高（可能是 3.14），而 `torch==2.11.0` 等依赖在过新的 Python 上往往还没有可用的安装包，构建会直接失败。`Secrets` 一栏留空即可，本项目未使用 Secrets。
 5. 点击 `Deploy`，等待依赖安装与构建完成，首次构建通常需要 5～10 分钟。
-6. 构建成功后页面会给出公网地址，形如 `https://<应用名>.streamlit.app`，把它填回本文档「在线体验」一节即可。
+6. 构建成功后页面会给出公网地址，形如 `https://<应用名>.streamlit.app`。
+
+本项目已按上述步骤完成部署，最终地址就是「在线体验」一节里的 `https://yolo-shixun.streamlit.app/`，无需再回填。
 
 部署完成后如果还要调整 Python 版本，可以在应用页面右侧的 `⋮` → `Settings` → `Advanced settings` 里改，改完重启应用生效。
 
@@ -282,6 +296,7 @@ python 03-推理结果解析.py
 | 报 `ResolutionImpossible` / `these package versions have conflicting dependencies` | torch 与 torchvision 版本没配对上。torchvision 会锁定确切的 torch 版本，两者必须成对修改 |
 | 长期卡在 `Solving environment`，或依赖解析失败 | 根目录出现了 `environment.yml`，云端改用 conda 解析。把它改名（本项目为 `environment-shixun.yml`）后重新推送 |
 | 下拉列表里找不到本仓库 | 候选列表不完整，手动输入 `YNDSlll/yolo-shixun`，或用 `Paste GitHub URL` |
+| 用 `curl` 或提交到第三方平台时被 303 跳转到 `share.streamlit.io/-/auth/app` | 这是 Cloud 对**没有会话 Cookie 的请求**做的统一认证跳转，**公开应用同样如此**，不代表应用被设成了私有。用浏览器正常打开即可。已实测 Streamlit 官方的 `llm-examples`、`datasets` 等公开应用返回结果完全一致 |
 | 报 `No matching distribution found for torch==...` | Python 版本太新，在 `Advanced settings` 里改成 3.11 后重新部署 |
 | 报 `ModuleNotFoundError` | 确认 `requirements.txt` 已推送到 `main` 分支 |
 | 报 `libGL.so.1: cannot open shared object file` | 确认 `packages.txt` 已推送，然后在控制台点 `Reboot app` |
@@ -291,7 +306,8 @@ python 03-推理结果解析.py
 
 ## 说明
 
-- 应用既可在本地运行，也可通过 Streamlit Cloud 在线访问，在线地址与演示账号见「在线体验」一节
+- 应用已上线，线上地址为 <https://yolo-shixun.streamlit.app/>；本地用 `streamlit run app.py` 运行，两端功能与界面一致
+- 线上只加载两个自训练的 `best.pt`，**不会**触发 `yolo26n.pt` 的自动下载——该权重仅被 `01` / `02` 号示例脚本使用
 - `app.py` 中的登录系统为简单演示用认证，账号密码固定写在代码里，不用于正式生产环境
 - 仓库为公开仓库，演示账号也一并公开，请勿在其中存放任何真实数据
 - 项目可进一步扩展到交通监控、安全检测、人机交互等实际场景
