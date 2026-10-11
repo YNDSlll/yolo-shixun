@@ -4,20 +4,30 @@
 # Streamlit Cloud 会自动读取本文件并安装，本地也可以直接：
 #   pip install -r requirements.txt
 #
-# 本地 conda / mamba 环境的完整清单见 environment.yml；
-# Python 版本由 runtime.txt 指定为 3.11，与本地 shixun 环境保持一致。
+# 本地 conda / mamba 环境的完整清单见 environment-shixun.yml；
+# Python 版本在部署时的 Advanced settings 里指定为 3.11（runtime.txt 在该平台无效）。
+# 注：本文件是「云端 pip 清单」，与本地 conda 快照的分工见 README。
 # =============================================================================
 
-# PyTorch 使用 CPU 轮子源：云端没有 GPU，装 CUDA 版会白白多出几个 G 的体积
+# PyTorch 使用 CPU 轮子源，避免在无 GPU 的云端安装体积巨大的 CUDA 版本
 --extra-index-url https://download.pytorch.org/whl/cpu
 
 # Web 界面（1.49 起才支持 button / form_submit_button 的 width 参数）
 streamlit==1.56.0
 
-# 推理框架版本，与本地 shixun 环境保持一致
-torch==2.10.0
+# torch 与 torchvision 必须成对：CPU 源上的 torchvision 0.26.0 要求 torch==2.11.0。
+# 这里只写基础版本号、刻意不加 +cpu 后缀：
+#   - Linux 上 pip 会选中 2.11.0+cpu（本地版本号高于 2.11.0）
+#   - macOS 上则正常从 PyPI 取常规轮子；若写死 +cpu，本地 pip 安装会失败
+#   （+cpu 轮子只有 Linux / Windows）
+torch==2.11.0
 torchvision==0.26.0
 
-# 目标检测框架：会自动带入 opencv-python / numpy / matplotlib /
-# pillow / pyyaml / scipy / psutil / polars / pandas / ultralytics-thop 等依赖
+# 目标检测框架：会自动带入 numpy / matplotlib / pillow / pyyaml /
+# scipy / psutil / polars / pandas / ultralytics-thop 等依赖
 ultralytics==8.4.39
+
+# opencv 显式钉住：ultralytics 只要求 >=4.6.0，不钉会装到 5.x，
+# 与本地验证过的版本跨度较大（cv2 大版本常有 API 变动）
+# 注：本地 conda 显示为 4.13.0，PyPI 上的完整版本号是 4.13.0.92
+opencv-python==4.13.0.92

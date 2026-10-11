@@ -209,6 +209,10 @@ pip install -r requirements.txt
 
 需要注意，Streamlit Cloud 的 Python 版本**不能通过仓库里的文件指定**（`runtime.txt` 在该平台不生效），必须在部署时的 `Advanced settings` 里手动选择，本项目请选 **3.11**，详见下一节。
 
+另外，云端 pin 的版本可能与本地 conda 环境略有差别，这是正常的：conda-forge 与 PyPI 的依赖元数据并不一致。例如本地 conda 装的 `torchvision 0.26.0` 可以和 `pytorch 2.10.0` 共存，但 CPU 源（PyPI 体系）上的 `torchvision 0.26.0` 要求 `torch==2.11.0`，因此 `requirements.txt` 里把两者成对固定为 `torch==2.11.0` + `torchvision==0.26.0`。
+
+> 提示：`requirements.txt` 中的 torch / torchvision 只写基础版本号、不写 `+cpu` 后缀。Linux 上 pip 会自动选中 `2.11.0+cpu`（本地版本号高于 `2.11.0`），而 macOS 上正常从 PyPI 安装；若写死成 `+cpu`，本地 pip 安装会因缺少 macOS 轮子而失败。
+
 ### 运行 Web 应用
 
 ```bash
@@ -275,6 +279,7 @@ python 03-推理结果解析.py
 | 现象 | 原因与处理 |
 | --- | --- |
 | 报 `E: Unable to locate package #`（后面还跟着一堆中英文单词） | `packages.txt` 里写了注释，apt 把注释文字也当成包名去装了。该文件只能一行一个包名，删掉注释后重新推送 |
+| 报 `ResolutionImpossible` / `these package versions have conflicting dependencies` | torch 与 torchvision 版本没配对上。torchvision 会锁定确切的 torch 版本，两者必须成对修改 |
 | 长期卡在 `Solving environment`，或依赖解析失败 | 根目录出现了 `environment.yml`，云端改用 conda 解析。把它改名（本项目为 `environment-shixun.yml`）后重新推送 |
 | 下拉列表里找不到本仓库 | 候选列表不完整，手动输入 `YNDSlll/yolo-shixun`，或用 `Paste GitHub URL` |
 | 报 `No matching distribution found for torch==...` | Python 版本太新，在 `Advanced settings` 里改成 3.11 后重新部署 |
