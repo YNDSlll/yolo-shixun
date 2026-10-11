@@ -72,7 +72,6 @@
 ├── environment.yml                     # 本地 conda / mamba 环境清单
 ├── requirements.txt                    # 部署依赖清单（Streamlit Cloud 读取此文件）
 ├── packages.txt                        # 系统级依赖（opencv 所需的 libGL 等）
-├── runtime.txt                         # 云端 Python 版本（3.11）
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -105,7 +104,6 @@
 - `environment.yml`：本地 conda / mamba 环境清单，由 `mamba env export -n shixun --no-builds` 导出，用于复现本地开发环境。
 - `requirements.txt`：Python 依赖清单，Streamlit Cloud 会自动读取并安装。
 - `packages.txt`：系统级依赖清单，主要是 `opencv` 在 Linux 上需要的 `libGL`。
-- `runtime.txt`：指定云端 Python 版本为 3.11，与本地环境一致。
 - `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
 - `datasets/FacialExpression/`：表情数据集目录，包含训练/验证数据与配置文件。
 - `runs/`：训练产物目录。为了避免仓库过大，仅随仓库发布两个 `best.pt` 权重，验证预测图、混淆矩阵、训练曲线等中间产物不入库。
@@ -201,11 +199,13 @@ mamba env export -n shixun --no-builds > environment.yml
 
 ### 云端部署环境（pip）
 
-云端不需要 conda，以 `requirements.txt` 为准，Python 版本由 `runtime.txt` 指定为 3.11：
+云端不需要 conda，以 `requirements.txt` 为准：
 
 ```bash
 pip install -r requirements.txt
 ```
+
+需要注意，Streamlit Cloud 的 Python 版本**不能通过仓库里的文件指定**（`runtime.txt` 在该平台不生效），必须在部署时的 `Advanced settings` 里手动选择，本项目请选 **3.11**，详见下一节。
 
 ### 运行 Web 应用
 
@@ -239,7 +239,6 @@ python 03-推理结果解析.py
 
 - `requirements.txt`：Python 依赖清单，云端会自动读取并安装
 - `packages.txt`：系统级依赖（`libgl1`、`libglib2.0-0`），避免 `opencv` 在 Linux 上报 `libGL.so.1` 缺失
-- `runtime.txt`：指定云端 Python 版本为 3.11，与本地 `shixun` 环境保持一致
 - 模型权重：两个自训练 `best.pt` 已随仓库发布（交通标志 4 类、人脸表情 8 类）
 - `app.py`：按脚本所在目录定位资源，并对模型启用缓存，避免每次点击都重新加载权重
 
@@ -256,13 +255,21 @@ python 03-推理结果解析.py
    | Main file path | `app.py` |
    | App URL | 自定义子域名，例如 `yolo-shixun` |
 
-4. 点击 `Deploy`，等待依赖安装与构建完成，首次构建通常需要 5～10 分钟。
-5. 构建成功后页面会给出公网地址，形如 `https://<应用名>.streamlit.app`，把它填回本文档「在线体验」一节即可。
+   > 仓库下拉框里的候选列表**不一定完整**，如果没有出现 `yolo-shixun`，直接在输入框里手动敲完整仓库名 `YNDSlll/yolo-shixun` 即可，或者用 `Paste GitHub URL` 粘贴仓库地址。
+
+4. 展开 `Advanced settings`，把 `Python version` 选成 **3.11**（与本地 `shixun` 环境一致）。
+   云端默认版本更高（可能是 3.14），而 `torch==2.10.0` 等依赖在过新的 Python 上往往还没有可用的安装包，构建会直接失败。`Secrets` 一栏留空即可，本项目未使用 Secrets。
+5. 点击 `Deploy`，等待依赖安装与构建完成，首次构建通常需要 5～10 分钟。
+6. 构建成功后页面会给出公网地址，形如 `https://<应用名>.streamlit.app`，把它填回本文档「在线体验」一节即可。
+
+部署完成后如果还要调整 Python 版本，可以在应用页面右侧的 `⋮` → `Settings` → `Advanced settings` 里改，改完重启应用生效。
 
 ### 常见问题
 
 | 现象 | 原因与处理 |
 | --- | --- |
+| 下拉列表里找不到本仓库 | 候选列表不完整，手动输入 `YNDSlll/yolo-shixun`，或用 `Paste GitHub URL` |
+| 报 `No matching distribution found for torch==...` | Python 版本太新，在 `Advanced settings` 里改成 3.11 后重新部署 |
 | 报 `ModuleNotFoundError` | 确认 `requirements.txt` 已推送到 `main` 分支 |
 | 报 `libGL.so.1: cannot open shared object file` | 确认 `packages.txt` 已推送，然后在控制台点 `Reboot app` |
 | 点击检测报「模型文件缺失」 | 权重没进仓库，检查 `runs/detect/trains/*/weights/best.pt` 是否已推送 |
