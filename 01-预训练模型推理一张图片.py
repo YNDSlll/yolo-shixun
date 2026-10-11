@@ -3,6 +3,7 @@ from ultralytics import YOLO
 
 if __name__ == '__main__':
     # 2.创建模型对象
+    # yolo26n.pt 是官方 COCO 预训练权重，未随仓库发布，首次运行会自动下载到项目根目录
     model = YOLO("yolo26n.pt")
 
     # 3.设置图片路径（和你的项目结构一致）

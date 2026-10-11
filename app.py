@@ -13,6 +13,7 @@ TRAFFIC_SIGNAL_MODEL_PATH = BASE_DIR / "runs/detect/trains/train-TrafficSignal/w
 # 人脸表情模型路径（8 类：Anger / Contempt / Disgust / Fear / Happy / Neutral / Sad / Surprise）
 FACIAL_EXPRESSION_MODEL_PATH = BASE_DIR / "runs/detect/trains/train-FacialExpression/weights/best.pt"
 # 若训练权重不可用时，可临时改用官方预训练权重做流程验证
+# （yolo26n.pt 未随仓库发布，YOLO() 首次加载时会自动下载到项目根目录）
 # TRAFFIC_SIGNAL_MODEL_PATH = BASE_DIR / "yolo26n.pt"
 
 # 上传图片与检测结果的存放目录
@@ -121,7 +122,7 @@ def facial_expression_detection_page():
                     os.makedirs(RESULT_PATH, exist_ok=True)
                     # 人脸表情模型路径
                     model_path = FACIAL_EXPRESSION_MODEL_PATH
-                    # 如果还没训练好，先用预训练模型测试：
+                    # 如果还没训练好，先用预训练模型测试（首次运行会自动下载权重）：
                     # model_path = BASE_DIR / "yolo26n.pt"
                     status.info("开始加载人脸表情检测模型")
                     if not model_path.exists():

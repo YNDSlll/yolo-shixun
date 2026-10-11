@@ -1,7 +1,11 @@
 # =============================================================================
-# yolo-shixun · 部署依赖清单
-# Streamlit Community Cloud 会自动读取本文件并安装；
-# 本地也可以直接用：pip install -r requirements.txt
+# yolo-shixun · 部署依赖清单（供 Streamlit Community Cloud 使用）
+#
+# Streamlit Cloud 会自动读取本文件并安装，本地也可以直接：
+#   pip install -r requirements.txt
+#
+# 本地 conda / mamba 环境的完整清单见 environment.yml；
+# Python 版本由 runtime.txt 指定为 3.11，与本地 shixun 环境保持一致。
 # =============================================================================
 
 # PyTorch 使用 CPU 轮子源：云端没有 GPU，装 CUDA 版会白白多出几个 G 的体积
@@ -10,10 +14,10 @@
 # Web 界面（1.49 起才支持 button / form_submit_button 的 width 参数）
 streamlit==1.56.0
 
-# 推理框架版本，与本地验证环境保持一致
+# 推理框架版本，与本地 shixun 环境保持一致
 torch==2.10.0
 torchvision==0.26.0
 
 # 目标检测框架：会自动带入 opencv-python / numpy / matplotlib /
-# pillow / pyyaml / scipy / psutil / polars / ultralytics-thop 等依赖
+# pillow / pyyaml / scipy / psutil / polars / pandas / ultralytics-thop 等依赖
 ultralytics==8.4.39

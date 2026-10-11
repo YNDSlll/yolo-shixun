@@ -69,9 +69,10 @@
 ├── 01-预训练模型推理一张图片.py
 ├── 02-预训练模型推理摄像头.py
 ├── 03-推理结果解析.py
-├── yolo26n.pt                          # 官方 COCO 预训练权重（80 类通用目标）
-├── requirements.txt                    # Python 依赖清单（云端部署读取此文件）
+├── environment.yml                     # 本地 conda / mamba 环境清单
+├── requirements.txt                    # 部署依赖清单（Streamlit Cloud 读取此文件）
 ├── packages.txt                        # 系统级依赖（opencv 所需的 libGL 等）
+├── runtime.txt                         # 云端 Python 版本（3.11）
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -101,9 +102,10 @@
 - `01-预训练模型推理一张图片.py`：演示单张图片推理流程，适用于快速验证模型效果。
 - `02-预训练模型推理摄像头.py`：基于本地摄像头实时检测，可用于现场演示和实验验证。
 - `03-推理结果解析.py`：读取并解析检测输出，提取类别、置信度和边界框信息，便于结果分析。
-- `yolo26n.pt`：官方 COCO 预训练权重，共 80 类通用目标，用于跑通推理流程以及作为自训练模型的后备。
+- `environment.yml`：本地 conda / mamba 环境清单，由 `mamba env export -n shixun --no-builds` 导出，用于复现本地开发环境。
 - `requirements.txt`：Python 依赖清单，Streamlit Cloud 会自动读取并安装。
 - `packages.txt`：系统级依赖清单，主要是 `opencv` 在 Linux 上需要的 `libGL`。
+- `runtime.txt`：指定云端 Python 版本为 3.11，与本地环境一致。
 - `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
 - `datasets/FacialExpression/`：表情数据集目录，包含训练/验证数据与配置文件。
 - `runs/`：训练产物目录。为了避免仓库过大，仅随仓库发布两个 `best.pt` 权重，验证预测图、混淆矩阵、训练曲线等中间产物不入库。
@@ -129,18 +131,19 @@
 
 ## 数据与模型
 
-项目涉及三个权重文件，作用并不相同，这里区分清楚：
+仓库中随项目发布的权重只有两个，都是本项目自训练得到的：
 
-| 权重文件 | 来源 | 类别数 | 用途 |
-| --- | --- | --- | --- |
-| `yolo26n.pt` | 官方 COCO 预训练权重 | 80 类通用目标 | 跑通推理流程、作为自训练模型的后备 |
-| `runs/detect/trains/train-TrafficSignal/weights/best.pt` | 本项目自训练 | 4 类交通标志 | 交通标志检测页面加载的模型 |
-| `runs/detect/trains/train-FacialExpression/weights/best.pt` | 本项目自训练 | 8 类人脸表情 | 人脸表情检测页面加载的模型 |
+| 权重文件 | 类别数 | 用途 |
+| --- | --- | --- |
+| `runs/detect/trains/train-TrafficSignal/weights/best.pt` | 4 类交通标志 | 交通标志检测页面加载的模型 |
+| `runs/detect/trains/train-FacialExpression/weights/best.pt` | 8 类人脸表情 | 人脸表情检测页面加载的模型 |
 
-两个自训练模型的类别如下：
+两个模型的类别如下：
 
 - 交通标志（4 类）：`prohibitory`（禁止）、`danger`（危险）、`mandatory`（强制）、`other`（其他）
 - 人脸表情（8 类）：`Anger`、`Contempt`、`Disgust`、`Fear`、`Happy`、`Neutral`、`Sad`、`Surprise`
+
+此外，仓库中的推理示例脚本使用官方 COCO 预训练权重 `yolo26n.pt`（80 类通用目标）来跑通推理流程。该权重体积较大且可以自动获取，因此没有随仓库发布，首次运行脚本时由 Ultralytics 自动下载到项目根目录。
 
 数据集不随仓库发布，训练过程中的验证预测图、混淆矩阵与训练曲线同样未入库，仓库中只保留两个可直接用于推理的 `best.pt`。
 
@@ -157,43 +160,50 @@
 
 ## 环境依赖
 
-依赖清单以仓库根目录的 `requirements.txt` 为准，云端部署会直接读取这份文件，本地也可以用同一份：
+### 本地开发环境（conda / mamba）
+
+本地使用 miniforge 管理环境，完整清单见仓库根目录的 `environment.yml`（Python 3.11.15 + conda-forge）：
 
 ```bash
-pip install -r requirements.txt
+# 已有环境，直接激活
+mamba activate shixun
+
+# 或者在新机器上按清单复现
+mamba env create -f environment.yml
+mamba activate shixun
 ```
 
-当前项目已在本地 conda 环境 `shixun` 中验证可运行，实际使用的核心库如下：
+当前 `shixun` 环境已验证可运行，核心依赖如下：
 
 ```text
+python==3.11.15
 streamlit==1.56.0
 ultralytics==8.4.39
-torch==2.10.0
+pytorch==2.10.0
 torchvision==0.26.0
-opencv-python==4.13.0
+opencv==4.13.0
 numpy==2.4.3
-Pillow==12.2.0
+pandas==3.0.2
 matplotlib==3.10.8
-PyYAML==6.0.3
+pillow==12.2.0
+pyyaml==6.0.3
 requests==2.33.1
 scipy==1.17.1
 psutil==7.2.2
 polars==1.40.0
 ```
 
-### 环境准备
-
-方式一：使用已配置好的 conda 环境
+如需重新导出完整清单，可在项目根目录执行：
 
 ```bash
-conda activate shixun
+mamba env export -n shixun --no-builds > environment.yml
 ```
 
-方式二：新建虚拟环境并按依赖清单安装
+### 云端部署环境（pip）
+
+云端不需要 conda，以 `requirements.txt` 为准，Python 版本由 `runtime.txt` 指定为 3.11：
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -229,7 +239,8 @@ python 03-推理结果解析.py
 
 - `requirements.txt`：Python 依赖清单，云端会自动读取并安装
 - `packages.txt`：系统级依赖（`libgl1`、`libglib2.0-0`），避免 `opencv` 在 Linux 上报 `libGL.so.1` 缺失
-- 模型权重：`yolo26n.pt` 与两个自训练 `best.pt` 均已随仓库发布
+- `runtime.txt`：指定云端 Python 版本为 3.11，与本地 `shixun` 环境保持一致
+- 模型权重：两个自训练 `best.pt` 已随仓库发布（交通标志 4 类、人脸表情 8 类）
 - `app.py`：按脚本所在目录定位资源，并对模型启用缓存，避免每次点击都重新加载权重
 
 ### 部署步骤
