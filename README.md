@@ -69,7 +69,7 @@
 ├── 01-预训练模型推理一张图片.py
 ├── 02-预训练模型推理摄像头.py
 ├── 03-推理结果解析.py
-├── environment.yml                     # 本地 conda / mamba 环境清单
+├── environment-shixun.yml              # 本地 conda / mamba 环境清单
 ├── requirements.txt                    # 部署依赖清单（Streamlit Cloud 读取此文件）
 ├── packages.txt                        # 系统级依赖（opencv 所需的 libGL 等）
 ├── .gitignore
@@ -101,7 +101,7 @@
 - `01-预训练模型推理一张图片.py`：演示单张图片推理流程，适用于快速验证模型效果。
 - `02-预训练模型推理摄像头.py`：基于本地摄像头实时检测，可用于现场演示和实验验证。
 - `03-推理结果解析.py`：读取并解析检测输出，提取类别、置信度和边界框信息，便于结果分析。
-- `environment.yml`：本地 conda / mamba 环境清单，由 `mamba env export -n shixun --no-builds` 导出，用于复现本地开发环境。
+- `environment-shixun.yml`：本地 conda / mamba 环境清单，由 `mamba env export -n shixun --no-builds` 导出，用于复现本地开发环境。文件名刻意不叫 `environment.yml`，避免被 Streamlit Cloud 识别成 conda 依赖文件（见下节说明）。
 - `requirements.txt`：Python 依赖清单，Streamlit Cloud 会自动读取并安装。
 - `packages.txt`：系统级依赖清单，主要是 `opencv` 在 Linux 上需要的 `libGL`。
 - `datasets/traffic_signal/`：交通标志数据集目录，包含训练/验证数据与配置文件。
@@ -160,14 +160,14 @@
 
 ### 本地开发环境（conda / mamba）
 
-本地使用 miniforge 管理环境，完整清单见仓库根目录的 `environment.yml`（Python 3.11.15 + conda-forge）：
+本地使用 miniforge 管理环境，完整清单见仓库根目录的 `environment-shixun.yml`（Python 3.11.15 + conda-forge）：
 
 ```bash
 # 已有环境，直接激活
 mamba activate shixun
 
 # 或者在新机器上按清单复现
-mamba env create -f environment.yml
+mamba env create -f environment-shixun.yml
 mamba activate shixun
 ```
 
@@ -194,8 +194,10 @@ polars==1.40.0
 如需重新导出完整清单，可在项目根目录执行：
 
 ```bash
-mamba env export -n shixun --no-builds > environment.yml
+mamba env export -n shixun --no-builds > environment-shixun.yml
 ```
+
+> ⚠️ 导出时请保持 `environment-shixun.yml` 这个文件名，**不要**改成 `environment.yml`：Streamlit Cloud 会按 `uv.lock > Pipfile > environment.yml > requirements.txt > pyproject.toml` 的优先级挑选依赖文件，且只用找到的第一个。一旦出现 `environment.yml`，云端就会改用 conda 去解这份 macOS 专用清单，导致构建失败或长时间卡在 `Solving environment`。
 
 ### 云端部署环境（pip）
 
@@ -242,6 +244,10 @@ python 03-推理结果解析.py
 - 模型权重：两个自训练 `best.pt` 已随仓库发布（交通标志 4 类、人脸表情 8 类）
 - `app.py`：按脚本所在目录定位资源，并对模型启用缓存，避免每次点击都重新加载权重
 
+> ⚠️ `packages.txt` 的内容会被整份交给 `apt-get install`，**只能一行一个包名，不能写任何注释**。写了 `#` 注释会被当成包名，报出 `E: Unable to locate package #` 这类错误，导致依赖安装整体失败（`requirements.txt` 不受影响，pip 是支持注释的）。
+>
+> ⚠️ 仓库根目录**不要出现名为 `environment.yml` 的文件**。Streamlit Cloud 按 `uv.lock > Pipfile > environment.yml > requirements.txt > pyproject.toml` 的优先级挑选依赖文件，且只用找到的第一个；`environment.yml` 排在 `requirements.txt` 前面，会被云端当成 conda 依赖交给 conda 解析，构建会失败或长时间卡在 `Solving environment`。本项目的本地环境清单因此命名为 `environment-shixun.yml`。
+
 ### 部署步骤
 
 1. 打开 [share.streamlit.io](https://share.streamlit.io/)，用 GitHub 账号登录并授权。
@@ -268,6 +274,8 @@ python 03-推理结果解析.py
 
 | 现象 | 原因与处理 |
 | --- | --- |
+| 报 `E: Unable to locate package #`（后面还跟着一堆中英文单词） | `packages.txt` 里写了注释，apt 把注释文字也当成包名去装了。该文件只能一行一个包名，删掉注释后重新推送 |
+| 长期卡在 `Solving environment`，或依赖解析失败 | 根目录出现了 `environment.yml`，云端改用 conda 解析。把它改名（本项目为 `environment-shixun.yml`）后重新推送 |
 | 下拉列表里找不到本仓库 | 候选列表不完整，手动输入 `YNDSlll/yolo-shixun`，或用 `Paste GitHub URL` |
 | 报 `No matching distribution found for torch==...` | Python 版本太新，在 `Advanced settings` 里改成 3.11 后重新部署 |
 | 报 `ModuleNotFoundError` | 确认 `requirements.txt` 已推送到 `main` 分支 |

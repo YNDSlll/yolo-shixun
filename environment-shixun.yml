@@ -5,11 +5,16 @@
 #   Python 3.11.15 / conda-forge 频道 / streamlit 1.56.0 / ultralytics 8.4.39
 #
 # 复现方式：
-#   mamba env create -f environment.yml
+#   mamba env create -f environment-shixun.yml
 #   mamba activate shixun
 #
-# 说明：本文件用于本地复现，含平台相关依赖；
-#      Streamlit Cloud 部署请使用 requirements.txt。
+# ⚠️ 为什么文件名不叫 environment.yml：
+#   Streamlit Community Cloud 按固定优先级挑选依赖文件，顺序为
+#   uv.lock > Pipfile > environment.yml > requirements.txt > pyproject.toml，
+#   并且「只用找到的第一个」。如果本文件叫 environment.yml，云端会优先
+#   走 conda 去解这份 macOS 专有清单，导致构建失败或长时间卡在
+#   Solving environment。改名为 environment-shixun.yml 即可避开识别，
+#   让云端正常使用 requirements.txt。
 # =============================================================================
 
 name: shixun
